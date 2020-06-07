@@ -1,0 +1,3 @@
+Gin Gonic logging middleware, JSON format to a file
+
+I wanted to code a webpage with gin-gonic framework, I ended up making a custom logger middleware...
