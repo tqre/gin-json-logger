@@ -13,21 +13,20 @@ import (
 )
 
 type LogItems struct {
-	ISOTime  time.Time
-	UnixTime int64
-
-	IP string
-
+	ISOTime       time.Time
+	UnixTime      int64
+	IP            string
 	Method        string
 	Path          string
 	Query         string
 	User          string
 	Protocol      string
+	ContentType   string
 	ContentLength int64
 	Host          string
 	// TLSVersion uint16
-	Response     int
-	ResponseSize int
+	ResponseStatus int
+	ResponseSize   int
 
 	RequestProcessingTime int64
 	LogProcessingTime     int64
@@ -61,25 +60,20 @@ func Logger_JSON(filename string, w_stdout bool) gin.HandlerFunc {
 		stop := time.Now().UnixNano()
 
 		log := LogItems{
-			ISOTime:  start,
-			UnixTime: start.UnixNano(),
-
-			// Context methods
-			IP: c.ClientIP(),
-
-			// Context struct
+			ISOTime:       start,
+			UnixTime:      start.UnixNano(),
+			IP:            c.ClientIP(),
 			Method:        c.Request.Method,
 			User:          c.Request.URL.User.Username(),
 			Path:          c.Request.URL.EscapedPath(),
 			Query:         c.Request.URL.RawQuery,
 			Protocol:      c.Request.Proto,
+			ContentType:   c.ContentType(),
 			ContentLength: c.Request.ContentLength,
 			Host:          c.Request.Host,
-			// TLS crashes if not present
-			// TLSVersion: c.Request.TLS.Version,
-
-			Response:     c.Writer.Status(),
-			ResponseSize: c.Writer.Size(),
+			//TLSVersion: c.Request.TLS.Version,
+			ResponseStatus: c.Writer.Status(),
+			ResponseSize:   c.Writer.Size(),
 		}
 
 		log.RequestProcessingTime = stop - log.UnixTime
