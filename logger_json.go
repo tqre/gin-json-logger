@@ -13,63 +13,72 @@ import (
 )
 
 type LogItems struct {
-	ISOTime time.Time
+	ISOTime  time.Time
 	UnixTime int64
 
 	IP string
 
-	Method string
-	Path string
-	Query string
-	Protocol string
-
-	Host string
-
-	Response int
+	Method        string
+	Path          string
+	Query         string
+	User          string
+	Protocol      string
+	ContentLength int64
+	Host          string
+	// TLSVersion uint16
+	Response     int
 	ResponseSize int
 
 	RequestProcessingTime int64
-	LogProcessingTime int64
+	LogProcessingTime     int64
 }
 
 var FormatJSON = func(log LogItems) string {
 	logline, _ := json.Marshal(log)
-	return fmt.Sprintf("%s\n" , logline)
+	return fmt.Sprintf("%s\n", logline)
 }
 
 func Logger_JSON(filename string, w_stdout bool) gin.HandlerFunc {
 
 	// TODO: When is the right time to close the log file?
-	logfile, err := os.OpenFile(filename, os.O_RDWR | os.O_CREATE | os.O_APPEND, 0644)
-	if err != nil {	fmt.Println(err) }
+	logfile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	// Write both to the file and stdout if desired
 	// TODO: Pretty-print to stdout option?
 	var out = io.Writer(logfile)
-	if w_stdout { out = io.MultiWriter(logfile, os.Stdout) }
+	if w_stdout {
+		out = io.MultiWriter(logfile, os.Stdout)
+	}
 
 	return func(c *gin.Context) {
 
+		// All time values are in nanoseconds
 		start := time.Now()
 		c.Next() // Request is processed here
 		stop := time.Now().UnixNano()
 
 		log := LogItems{
-			ISOTime: start,
+			ISOTime:  start,
 			UnixTime: start.UnixNano(),
 
 			// Context methods
 			IP: c.ClientIP(),
 
 			// Context struct
-			Method: c.Request.Method,
-			Path: c.Request.URL.Path,
-			Query: c.Request.URL.RawQuery,
-			Protocol: c.Request.Proto,
+			Method:        c.Request.Method,
+			User:          c.Request.URL.User.Username(),
+			Path:          c.Request.URL.EscapedPath(),
+			Query:         c.Request.URL.RawQuery,
+			Protocol:      c.Request.Proto,
+			ContentLength: c.Request.ContentLength,
+			Host:          c.Request.Host,
+			// TLS crashes if not present
+			// TLSVersion: c.Request.TLS.Version,
 
-			Host: c.Request.Host,
-
-			Response: c.Writer.Status(),
+			Response:     c.Writer.Status(),
 			ResponseSize: c.Writer.Size(),
 		}
 
