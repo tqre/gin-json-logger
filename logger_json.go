@@ -17,13 +17,14 @@ type LogItems struct {
 	UnixTime       int64
 	IP             string
 	Method         string
+	Host           string
+	User           string
 	Path           string
 	Query          string
-	User           string
 	Protocol       string
+	UserAgent      string
 	ContentType    string
 	ContentLength  int64
-	Host           string
 	ResponseStatus int
 	ResponseSize   int
 	TLSData        TLSData
@@ -69,13 +70,14 @@ func Logger_JSON(filename string, w_stdout bool) gin.HandlerFunc {
 			UnixTime:       start.UnixNano(),
 			IP:             c.ClientIP(),
 			Method:         c.Request.Method,
+			Host:           c.Request.Host,
 			User:           c.Request.URL.User.Username(),
 			Path:           c.Request.URL.EscapedPath(),
 			Query:          c.Request.URL.RawQuery,
 			Protocol:       c.Request.Proto,
+			UserAgent:      c.Request.UserAgent(),
 			ContentType:    c.ContentType(),
 			ContentLength:  c.Request.ContentLength,
-			Host:           c.Request.Host,
 			ResponseStatus: c.Writer.Status(),
 			ResponseSize:   c.Writer.Size(),
 		}
