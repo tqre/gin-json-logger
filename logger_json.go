@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
+	"net/http"
 	"os"
 	"time"
 )
@@ -22,11 +23,11 @@ type LogItems struct {
 	Path           string
 	Query          string
 	Protocol       string
-	UserAgent      string
 	ContentType    string
 	ContentLength  int64
 	ResponseStatus int
 	ResponseSize   int
+	Headers        http.Header
 	TLSData        TLSData
 
 	RequestProcessingTime int64
@@ -34,8 +35,9 @@ type LogItems struct {
 }
 
 type TLSData struct {
-	TLSVersion    uint16
-	TLSCipherUsed uint16
+	TLSVersion     uint16
+	TLSCipherUsed  uint16
+	TLSMutualProto bool
 }
 
 var FormatJSON = func(log LogItems) string {
@@ -75,11 +77,12 @@ func Logger_JSON(filename string, w_stdout bool) gin.HandlerFunc {
 			Path:           c.Request.URL.EscapedPath(),
 			Query:          c.Request.URL.RawQuery,
 			Protocol:       c.Request.Proto,
-			UserAgent:      c.Request.UserAgent(),
 			ContentType:    c.ContentType(),
 			ContentLength:  c.Request.ContentLength,
 			ResponseStatus: c.Writer.Status(),
 			ResponseSize:   c.Writer.Size(),
+			// Headers are now placed arrays, eg. "Dnt":["1"]
+			Headers: c.Request.Header,
 		}
 
 		if c.Request.TLS != nil {
