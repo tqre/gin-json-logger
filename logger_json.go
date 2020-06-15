@@ -88,8 +88,9 @@ func Logger_JSON(filename string, w_stdout bool) gin.HandlerFunc {
 		if c.Request.TLS != nil {
 			// https://golang.org/pkg/crypto/tls/#pkg-constants
 			log.TLSData = TLSData{
-				TLSVersion:    c.Request.TLS.Version,
-				TLSCipherUsed: c.Request.TLS.CipherSuite,
+				TLSVersion:     c.Request.TLS.Version,
+				TLSCipherUsed:  c.Request.TLS.CipherSuite,
+				TLSMutualProto: c.Request.TLS.NegotiatedProtocolIsMutual,
 			}
 		}
 
