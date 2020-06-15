@@ -82,6 +82,7 @@ func Logger_JSON(filename string, w_stdout bool) gin.HandlerFunc {
 			ResponseStatus: c.Writer.Status(),
 			ResponseSize:   c.Writer.Size(),
 			// Headers are now placed arrays, eg. "Dnt":["1"]
+			// Header type is not a struct, but is the format a problem?
 			Headers: c.Request.Header,
 		}
 
